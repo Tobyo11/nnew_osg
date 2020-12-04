@@ -37,7 +37,7 @@ CLabel::CLabel(const std::string str, osg::Vec4f lineColor, osg::Vec4f fillColor
 	_textShowBoxGeom->setName("textShowBoxGeom");
 
 	_connectLineDegreee = 45.0;
-	_connectLineLength = 7.0;
+	_connectLineLength = 700.0;
 
 	_labelInfo = str;
 	_lineColor = lineColor;
@@ -53,27 +53,6 @@ CLabel::~CLabel()
 	//
 }
 
-//void CLabel::updateConnectLineGeom(osg::ref_ptr<osg::Geometry> pGeom, osg::Matrixd mat)
-//{
-//	if (pGeom)
-//	{
-//		osg::Vec3 vPos = mat.getTrans();
-//		if (vPos.length() > 0.1)
-//		{
-//			pGeom->removePrimitiveSet(0, pGeom->getNumPrimitiveSets());
-//			osg::Vec3Array* pVertex = dynamic_cast<osg::Vec3Array*>(pGeom->getVertexArray());
-//			pVertex->clear();
-//			pVertex->push_back(osg::Vec3(0.0, 0.0, 0.0));
-//			pVertex->push_back(vPos);
-//
-//			osg::Vec4Array* pColor = dynamic_cast<osg::Vec4Array*>(pGeom->getColorArray());
-//			pColor->clear();
-//			pColor->push_back(_lineColor);
-//
-//			pGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, 2));
-//		}
-//	}
-//}
 
 void CLabel::updateConnectLineGeom()
 {
@@ -330,6 +309,6 @@ void CLabel::initLabelGroup()
 
 void CLabel::initLabelAutoTransform()
 {
-	createAutoTransformNode(osg::AutoTransform::ROTATE_TO_SCREEN, true);
+	createAutoTransformNode(osg::AutoTransform::ROTATE_TO_SCREEN, false);
 	_labelAutoTransform->addChild(_labelGroup);
 }

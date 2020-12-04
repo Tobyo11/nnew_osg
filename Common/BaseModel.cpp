@@ -117,21 +117,21 @@ void BaseModel::addTargetLock(std::vector<osg::MatrixTransform*> vecModel)
 
 void BaseModel::initTrackLabel()
 {
-	//Ìí¼ÓÎ²¼£
-	if (_modelTrack == NULL)
-	{
-		//_modelTrack = new CTrack(_trackType, /*osg::Vec4f(0.0, 1.0, 0.0, 1.0)*/_modelColor);
-		//_modelGroup->addChild(_modelTrack->getTrackGeode());
-		_modelTrack = new NTrack(_trackType, _modelColor);
-		_modelGroup->addChild(_modelTrack->getTrackGeode());
-	}
-
-	////Ìí¼Ó±êÅÆ
-	//if (_modelLabel == NULL)
+	////Ìí¼ÓÎ²¼£
+	//if (_modelTrack == NULL)
 	//{
-	//	_modelLabel = new CLabel("test\ntest\ntest\n", _modelColor, osg::Vec4f(_modelColor.x(), _modelColor.y(), _modelColor.z(), 0.2), 1);
-	//	_modelGroup->addChild(_modelLabel->getLabelRoot());
+	//	//_modelTrack = new CTrack(_trackType, /*osg::Vec4f(0.0, 1.0, 0.0, 1.0)*/_modelColor);
+	//	//_modelGroup->addChild(_modelTrack->getTrackGeode());
+	//	_modelTrack = new NTrack(_trackType, _modelColor);
+	//	_modelGroup->addChild(_modelTrack->getTrackGeode());
 	//}
+
+	//Ìí¼Ó±êÅÆ
+	if (_modelLabel == NULL)
+	{
+		_modelLabel = new CLabel("test\ntest\ntest\n", _modelColor, osg::Vec4f(_modelColor.x(), _modelColor.y(), _modelColor.z(), 0.2), 1);
+		_modelGroup->addChild(_modelLabel->getLabelRoot());
+	}
 }
 
 void BaseModel::setTrackVisible(bool state)

@@ -105,6 +105,9 @@
     <ClCompile Include="main_AirborneRadar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Common\copym.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\BaseModel.h">
@@ -147,6 +150,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Common\AirborneRadar.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\copym.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

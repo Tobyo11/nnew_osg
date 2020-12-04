@@ -23,8 +23,11 @@
 
 #include <iostream>
 CModel3D* modelCopy1;//test
+CModel2D* modelCopy12D;
 std::vector<CModel2D*> vecModel2D;
 std::vector<CModel3D*> vecModel3D;
+std::vector<osg::MatrixTransform*> vecModelMT2D;
+std::vector<osg::MatrixTransform*> vecModelMT3D;
 
 class CKeyboardHandler2D :public osgGA::GUIEventHandler
 {
@@ -91,7 +94,7 @@ public:
 				removeChildrenbyNodeName(_earth->getSwitchMapNode3D(), "explosionEffect");
 				_earth->addChild3D(exp->createExplosionNode(osg::Vec3d() * matTarget3D));
 			}
-			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_F4)
+			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_F4)//3d follow
 			{
 
 				if (_earth->getViewer()->getNumViews() == 3)
@@ -107,24 +110,24 @@ public:
 					_earth->add3DfollowView();
 				}
 			}
-			if (ea.getKey() == 'B')
+			if (ea.getKey() == 'B')//add shp
 			{
 				_earth->addShp("D:/data/chinashp/world.shp", shpLine);
 			}
-			if (ea.getKey() == 'M')
+			if (ea.getKey() == 'M')//add shp
 			{
 				_earth->getMapNode3D()->getMap()->removeLayer(_earth->getMapNode3D()->getMap()->getLayerByName("123"));
 			}
-			if (ea.getKey() == 'N')
+			if (ea.getKey() == 'N')//delet shp
 			{
 				_earth->addShp("D:/data/chinashp/pp.shp", shpName);
 				//_earth->addShp("D:/data/chinashp/铁路_polyline.shp", shpLine);
 			}
-			if (ea.getKey() == 'O')
+			if (ea.getKey() == 'O')//open draw line
 			{
 				_earth->openDrawLine();
 			}
-			if (ea.getKey() == 'P')
+			if (ea.getKey() == 'P')////close draw line
 			{
 				_earth->closeDrawLine();
 			}
@@ -152,7 +155,7 @@ int main(int argc, char** argv)
 
 	for (int i = 0; i < 100; i++)//添加路径相机路径
 		earth->addCameraPath(106.56, 29.55 + 0.01*i, 2500, i);
-
+	
 	earth->addImageLayer("GoogleImage2D", false, OEDriverType::TMS, "D:/Openstreet/tms.xml");
 	earth->addImageLayer("GoogleImage3D", true, OEDriverType::TMS, "D:/data/google/image/tms.xml");
 	earth->addElevationLayer("3DElevation", true, OEDriverType::VBP, "D:/data/Earth/output/earth.ive");
@@ -170,17 +173,56 @@ int main(int argc, char** argv)
 	mc2.modelFilePath = "PanoISRResource/texture/TYPE_AIRCRAFT.png";
 	CModel2D* m2 = new CModel2D(mc2);
 
+	
+
+	for (int i = 0; i < 33; i++)
+		for (int j = 0; j < 33; j++)
+		{
+			CModel3D* modelCopy = /*new CModel3D(mc)*/ m3->clone(osg::CopyOp::SHALLOW_COPY);
+			modelCopy->setModelName(modelCopy->getModelName() + "-" + (std::to_string(i) + std::to_string(j)));
+			modelCopy->setModelScale(osg::Vec3(3, 3, 3));
+
+			osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(true/*earth->getMapNode3D()*/, 106.56 + i * 0.05, 29.55 + j * 0.05, 2000/* + j * 2000*/);
+				osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
+				modelCopy->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
+			modelCopy->setModelMatrix(mat3D);
+			earth->addChild3D(modelCopy->getModelGroup());
+			vecModel3D.push_back(modelCopy);
+			//vecModelMT3D.push_back(modelCopy->getModel());
+
+			CModel2D* modelCopy2D = m2->clone(osg::CopyOp::SHALLOW_COPY);
+			modelCopy2D->setModelName(modelCopy2D->getModelName() + "-" + (std::to_string(i) + std::to_string(j)));
+			
+
+			osg::Matrix mat2D = getWorldMatrixfromLonLatHeight(false/*earth->getMapNode2D()*/, 106.56 + i * 0.05, 29.55 + j * 0.05, 2000 /*+ j * 2000*/);
+				osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
+				modelCopy2D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
+			modelCopy2D->setModelMatrix(mat2D);
+			earth->addChild2D(modelCopy2D->getModelGroup());
+			vecModel2D.push_back(modelCopy2D);
+			//vecModelMT2D.push_back(modelCopy2D->getModel());
+		}
 	//test 3d follow
 	{
 		modelCopy1 = m3->clone(osg::CopyOp::SHALLOW_COPY);
 		modelCopy1->setModelScale(osg::Vec3(3, 3, 3));
 
-		osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(earth->getMapNode3D(), 106.56 + 1.8, 29.55 + 1.8, 2000);
+		osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(earth->getMapNode3D(), 106.56 + 1.8, 29.55 + 2.8, 10200);
 		osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
 		modelCopy1->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
 		modelCopy1->setModelMatrix(mat3D);
 		earth->addChild3D(modelCopy1->getModelGroup());
 		vecModel3D.push_back(modelCopy1);
+
+		modelCopy12D = m2->clone(osg::CopyOp::SHALLOW_COPY);
+		//modelCopy12D->setModelScale(osg::Vec3(3, 3, 3));
+
+		osg::Matrix mat2D = getWorldMatrixfromLonLatHeight(earth->getMapNode2D(), 106.56 + 1.8, 29.55 + 1.8,10200);
+		osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
+		modelCopy12D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
+		modelCopy12D->setModelMatrix(mat2D);
+		earth->addChild2D(modelCopy12D->getModelGroup());
+		vecModel2D.push_back(modelCopy12D);
 
 		//osg::AutoTransform* at = new osg::AutoTransform;
 
@@ -195,32 +237,6 @@ int main(int argc, char** argv)
 
 
 	}
-
-	for (int i = 0; i < 10; i++)
-		for (int j = 0; j < 20; j++)
-		{
-			CModel3D* modelCopy = /*new CModel3D(mc)*/ m3->clone(osg::CopyOp::SHALLOW_COPY);
-			modelCopy->setModelName(modelCopy->getModelName() + "-" + (std::to_string(i) + std::to_string(j)));
-			modelCopy->setModelScale(osg::Vec3(3, 3, 3));
-
-			osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(true/*earth->getMapNode3D()*/, 106.56 + i * 0.1, 29.55 + j * 0.1, 2000/* + j * 2000*/);
-				osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
-				modelCopy->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
-			modelCopy->setModelMatrix(mat3D);
-			earth->addChild3D(modelCopy->getModelGroup());
-			vecModel3D.push_back(modelCopy);
-
-			CModel2D* modelCopy2D = m2->clone(osg::CopyOp::SHALLOW_COPY);
-			modelCopy2D->setModelName(modelCopy2D->getModelName() + "-" + (std::to_string(i) + std::to_string(j)));
-			//modelCopy2D->setModelScale(osg::Vec3(5, 5, 5));
-
-			osg::Matrix mat2D = getWorldMatrixfromLonLatHeight(false/*earth->getMapNode2D()*/, 106.56 + i * 0.1, 29.55 + j * 0.1, 2000 /*+ j * 2000*/);
-				osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
-				modelCopy2D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
-			modelCopy2D->setModelMatrix(mat2D);
-			earth->addChild2D(modelCopy2D->getModelGroup());
-			vecModel2D.push_back(modelCopy2D);
-		}
 	
 	//CExplosion* exp = new CExplosion(3000000);
 	//earth->addChild3D(exp->createExplosionNode(osg::Vec3d()));
@@ -232,6 +248,9 @@ int main(int argc, char** argv)
 	//{
 	//	vecModel2D[i]->closeModelAutoTransform();
 	//}
+
+	//modelCopy1->addTargetLock(vecModelMT3D);
+	//modelCopy12D->addTargetLock(vecModelMT2D);
 
 	return earth->start();
 }

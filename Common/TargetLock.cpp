@@ -299,7 +299,7 @@ osg::ref_ptr<osg::MatrixTransform> NTargetLock::createLock(osg::Vec4d color)
 	pStateSet->setAttributeAndModes(new osg::Depth(osg::Depth::LESS, 0.0, 1.0, true), osg::StateAttribute::ON);
 	pStateSet->setAttributeAndModes(new osg::LineWidth(2), osg::StateAttribute::ON);
 
-	lockGeom->setUpdateCallback(new RayLineCallback(osg::Vec3d(), osg::Vec3d(0.0, 1.0, 0.0), 0.07, 0.05, 0.003));
+	lockGeom->setUpdateCallback(new RayLineCallback(osg::Vec3d(), osg::Vec3d(0.0, 1.0, 0.0), 0.03, 0.02, 0.001));
 
 	lockGeode->addDrawable(lockGeom);
 	lockSelf->addChild(lockGeode);

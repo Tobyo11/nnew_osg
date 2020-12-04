@@ -302,7 +302,7 @@ void NTrackCallback::operator()(osg::Node * node, osg::NodeVisitor * nv)
 				}
 				else
 				{
-					osg::Vec3d tailPoint = (osg::Vec3d(0.0, _adjustVar * _model->getBound().radius(), 0.0) * _model->getMatrix());
+					osg::Vec3d tailPoint = (osg::Vec3d(0.0, 0.0/*_adjustVar * _model->getBound().radius()*/, 0.0) * _model->getMatrix());
 					verArray->push_back(tailPoint);//取模型尾部中心3D
 				}
 			}
@@ -316,7 +316,7 @@ void NTrackCallback::operator()(osg::Node * node, osg::NodeVisitor * nv)
 				}
 				else
 				{
-					osg::Vec3d tailPoint = (osg::Vec3d(0.0, _adjustVar * _model->getBound().radius(), 0.0) * _model->getMatrix());
+					osg::Vec3d tailPoint = (osg::Vec3d(0.0,0.0/* _adjustVar * _model->getBound().radius()*/, 0.0) * _model->getMatrix());
 					verArray->push_back(tailPoint);//取模型尾部中心3D
 				}
 			}
@@ -361,7 +361,7 @@ void NTrackCallback::operator()(osg::Node * node, osg::NodeVisitor * nv)
 				}
 				else
 				{
-					osg::Vec3d tailPoint = (osg::Vec3d(0.0, _adjustVar * _model->getBound().radius(), 0.0) * _model->getMatrix());
+					osg::Vec3d tailPoint = (osg::Vec3d(0.0, 1.15*_adjustVar * _model->getBound().radius(), -0.1*_adjustVar * _model->getBound().radius()) * _model->getMatrix());
 					verArray->push_back(tailPoint);//取模型尾部中心3D
 				}
 				colorArray->clear();
@@ -387,7 +387,7 @@ void NTrackCallback::operator()(osg::Node * node, osg::NodeVisitor * nv)
 				}
 				else
 				{
-					osg::Vec3d tailPoint = (osg::Vec3d(0.0, _adjustVar * _model->getBound().radius(), 0.0) * _model->getMatrix());
+					osg::Vec3d tailPoint = (osg::Vec3d(0.0, 1.15*_adjustVar * _model->getBound().radius(), -0.1*_adjustVar * _model->getBound().radius()) * _model->getMatrix());
 					verArray->push_back(tailPoint);//取模型尾部中心3D
 				}
 			}
@@ -439,12 +439,12 @@ void LabelCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
 			getLonLatHeightfromWorld(_is3D, entityCenterPos, lon, lat, height);
 			std::string strLon = convertDoubletoString(lon, 2);
 			std::string strLat = convertDoubletoString(lat, 2);
-			std::string strHei = convertDoubletoString(height, 2);
+			//std::string strHei = convertDoubletoString(height, 2);
 			std::string strInfo =
 				_model->getName() + "\n" +
 				"Lon: " + strLon + "\n" +
-				"Lat: " + strLat + "\n" +
-				"Alt: " + strHei;
+				"Lat: " + strLat/* + "\n" +
+				"Alt: " + strHei*/;
 			_pLabel->updateTextInfo(strInfo);
 			_pLabel->updateTextShowBoxGeom();
 			_pLabel->updateTextShowLineGeom();

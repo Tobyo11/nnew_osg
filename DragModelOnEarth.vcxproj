@@ -113,13 +113,14 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>osg.lib;osgDB.lib;osgUtil.lib;osgViewer.lib;osgText.lib;osgGA.lib;osgFX.lib;osgParticle.lib;osgManipulator.lib;osgEarth.lib;osgEarthUtil.lib;osgEarthAnnotation.lib;osgEarthSymbology.lib;osgEarthFeatures.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>osg.lib;osgDB.lib;osgUtil.lib;osgViewer.lib;osganimation.lib;osgText.lib;osgGA.lib;osgFX.lib;osgParticle.lib;osgManipulator.lib;osgEarth.lib;osgEarthUtil.lib;osgEarthAnnotation.lib;osgEarthSymbology.lib;osgEarthFeatures.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\OSG\OpenSceneGraph-OpenSceneGraph-3.6.3\build\lib;D:\OSG\osgearth\bulid\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Common\BaseModel.cpp" />
     <ClCompile Include="Common\CallBack.cpp" />
+    <ClCompile Include="Common\copym.cpp" />
     <ClCompile Include="Common\DigitalEarth.cpp" />
     <ClCompile Include="Common\Explosion.cpp" />
     <ClCompile Include="Common\Label.cpp" />
@@ -151,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="Common\BaseModel.h" />
     <ClInclude Include="Common\CallBack.h" />
+    <ClInclude Include="Common\copym.h" />
     <ClInclude Include="Common\DataStruct.h" />
     <ClInclude Include="Common\DigitalEarth.h" />
     <ClInclude Include="Common\Explosion.h" />

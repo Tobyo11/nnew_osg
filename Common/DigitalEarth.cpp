@@ -1,5 +1,5 @@
 #include "DigitalEarth.h"
-
+#include "copym.h"
 #include <osgViewer/ViewerEventHandlers>
 
 #include <osgEarth/ImageLayer>
@@ -390,7 +390,7 @@ void DigitalEarth::createManipulator()
 {
 	//3D多操作器
 	osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyPtr = new osgGA::KeySwitchMatrixManipulator();
-	//osg::ref_ptr<EarthWalkManipulator> ewm = new EarthWalkManipulator;//漫游操作器
+	osg::ref_ptr<EarthWalkManipulator> ewm = new EarthWalkManipulator;//漫游操作器
 
 	//使用动画漫游器
 	osg::ref_ptr <osgGA::AnimationPathManipulator> animationPathMp = new osgGA::AnimationPathManipulator();
@@ -402,7 +402,7 @@ void DigitalEarth::createManipulator()
 
 	keyPtr->addMatrixManipulator('1', "earthMan", _earthManipulator3D);
 	keyPtr->addMatrixManipulator('2', "animationPathMan", animationPathMp);
-	//keyPtr->addMatrixManipulator('3', "EarthWalkManipulator", ewm);
+	keyPtr->addMatrixManipulator('3', "EarthWalkManipulator", ewm);
 	_viewer3D->setCameraManipulator(keyPtr);
 }
 
