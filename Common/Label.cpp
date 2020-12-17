@@ -1,5 +1,5 @@
 #include "Label.h"
-
+#include <osgViewer/Viewer>
 #include <osg/MatrixTransform>
 #include <osg/LineWidth>
 
@@ -37,7 +37,7 @@ CLabel::CLabel(const std::string str, osg::Vec4f lineColor, osg::Vec4f fillColor
 	_textShowBoxGeom->setName("textShowBoxGeom");
 
 	_connectLineDegreee = 45.0;
-	_connectLineLength = 700.0;
+	_connectLineLength = 7.0;
 
 	_labelInfo = str;
 	_lineColor = lineColor;
@@ -280,9 +280,19 @@ void CLabel::initLabelGroup()
 
 	_labelSelf->addChild(_labelObj);
 	_label->addChild(_labelSelf);
-	_labelGroup->addChild(_label);
-	_labelGroup->addChild(_connectLineGeode);
+	//test
+	/*_labelGroup->addChild(_label);
+	_labelGroup->addChild(_connectLineGeode);*/
 
+
+	
+	osg::ref_ptr<osg::LOD> lod = new osg::LOD;
+
+	lod->addChild(_label, 50, 500);//当距离在 0 与 500显示
+	lod->addChild(_connectLineGeode, 50, 500);//当距离在 0 与 500显示
+	_labelGroup->addChild(lod);
+
+	//
 	createTextGeom();
 
 	//_textGeode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, 0);
@@ -309,6 +319,6 @@ void CLabel::initLabelGroup()
 
 void CLabel::initLabelAutoTransform()
 {
-	createAutoTransformNode(osg::AutoTransform::ROTATE_TO_SCREEN, false);
+	createAutoTransformNode(osg::AutoTransform::ROTATE_TO_SCREEN, true);
 	_labelAutoTransform->addChild(_labelGroup);
 }

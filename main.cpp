@@ -22,7 +22,12 @@
 #include "Common//PickDragHandler.h"
 
 #include <iostream>
+#include <osgEarthUtil/Controls>
 CModel3D* modelCopy1;//test
+CModel3D* modelCopy2;//test
+CModel3D* modelCopy3;//test
+CModel3D* modelCopy4;//test
+CModel3D* modelCopy5;//test
 CModel2D* modelCopy12D;
 std::vector<CModel2D*> vecModel2D;
 std::vector<CModel3D*> vecModel3D;
@@ -89,7 +94,7 @@ public:
 			}
 			if (ea.getKey() == osgGA::GUIEventAdapter::KEY_B)
 			{
-				osg::Matrix matTarget3D = getWorldMatrixfromLonLatHeight(true, 106.56, 29.55, 1000);
+				osg::Matrix matTarget3D = getWorldMatrixfromLonLatHeight(true, 120.047, 24.507, 1000);
 				CExplosion* exp = new CExplosion(1000);
 				removeChildrenbyNodeName(_earth->getSwitchMapNode3D(), "explosionEffect");
 				_earth->addChild3D(exp->createExplosionNode(osg::Vec3d() * matTarget3D));
@@ -144,10 +149,125 @@ public:
 private:
 	DigitalEarth* _earth;
 };
+/////35path
+const osgEarth::Util::Controls::SpatialReference* mapSRS;
+///
+double get_dis(osg::Vec3 from, osg::Vec3 to)
+{
+	return sqrt((to.x() - from.x())*(to.x() - from.x()) + (to.y() - from.y())*(to.y() - from.y()) + (to.z() - from.z())*(to.z() - from.z()));
+}
+///
+double get_runtime(osg::Vec3 from, osg::Vec3 to, double speed)
+{
+	double dist = get_dis(from, to);
+	if (speed == 0)
+		return 10000000000;
+	return dist / speed;
+}
+osg::ref_ptr<osg::AnimationPath> creatAitPath(osg::Vec4Array* ctrl)
+{
+	osg::ref_ptr<osg::AnimationPath> animationPath = new osg::AnimationPath;
+	animationPath->setLoopMode(osg::AnimationPath::LOOP);
 
+	double sp_angle;
+	double cz_angle;
+
+	osg::Vec3d point_cur;
+	osg::Vec3d point_next;
+	osg::Matrix matrix;
+	osg::Quat _rotation;
+	//_rotation.makeRotate(osg::DegreesToRadians(270.0), 0.0, 0.0, 1.0);
+	double time = 0;
+
+
+	for (osg::Vec4Array::iterator iter = ctrl->begin(); iter != ctrl->end(); iter++)
+	{
+		osg::Vec4Array::iterator iter2 = iter;
+		iter2++;
+
+		if (iter2 == ctrl->end())
+		{
+			break;
+		}
+
+
+
+
+
+
+		double x, y, z;
+		//std::cout << osg::DegreesToRadians(iter->y()) << "-" << osg::DegreesToRadians(iter->x()) << std::endl;
+		mapSRS->getEllipsoid()->convertLatLongHeightToXYZ(osg::DegreesToRadians(iter->y()), osg::DegreesToRadians(iter->x()), iter->z(), x, y, z);
+
+		point_cur = osg::Vec3d(x, y, z);
+		mapSRS->getEllipsoid()->convertLatLongHeightToXYZ(osg::DegreesToRadians(iter2->y()), osg::DegreesToRadians(iter2->x()), iter2->z(), x, y, z);
+		point_next = osg::Vec3d(x, y, z);
+
+		//水平角
+		if (iter->x() == iter2->x())
+		{
+			sp_angle = osg::PI_2;
+		}
+		else
+		{
+			sp_angle = atan((iter2->y() - iter->y()) / (iter2->x() - iter->x()));
+			if (iter2->x() > iter->x())
+			{
+				sp_angle += (osg::PI_2 * 2);
+			}
+		}
+		//俯仰角
+
+		if (iter->z() == iter2->z())
+		{
+
+			cz_angle = 0;
+		}
+		else
+		{
+			if (0 == sqrt(pow(get_dis(point_cur, point_next), 2) - pow((iter2->z() - iter->z()), 2)))
+			{
+				cz_angle = osg::PI_2;
+			}
+			else
+			{
+				cz_angle = atan((iter2->z() - iter->z()) / sqrt(pow(get_dis(point_cur, point_next), 2) - pow((iter2->z() - iter->z()), 2)));
+
+			}
+			if (cz_angle > osg::PI_2)
+			{
+				cz_angle = osg::PI_2;
+			}
+			if (cz_angle < -osg::PI_2)
+			{
+				cz_angle = -osg::PI_2;
+			}
+		}
+		//求变换矩阵
+		mapSRS->getEllipsoid()->computeLocalToWorldTransformFromLatLongHeight(osg::DegreesToRadians(iter->y()), osg::DegreesToRadians(iter->x()), iter->z(), matrix);
+		_rotation.makeRotate(0, osg::Vec3(1.0, 0.0, 0.0), cz_angle, osg::Vec3(0.0, 1.0, 0.0), sp_angle + osg::PI_2, osg::Vec3(0.0, 0.0, 1.0));
+		matrix.preMultRotate(_rotation);
+
+		//matrix.preMult(osg::Matrix::scale(osg::Vec3(100, 100, 100)));
+
+		//matrix.preMultScale(osg::Matrix::scale(osg::Vec3(100, 100, 100)));
+
+		animationPath->insert(time, osg::AnimationPath::ControlPoint(point_cur, matrix.getRotate()));
+
+		//求下一点time
+		time += get_runtime(point_cur, point_next, iter2->w());
+
+	}
+	animationPath->insert(time, osg::AnimationPath::ControlPoint(point_next, matrix.getRotate()));
+
+	return animationPath.release();
+}
+////
 int main(int argc, char** argv)
 {
 	DigitalEarth* earth = new DigitalEarth();
+
+	mapSRS = earth->getMapNode3D()->getMapSRS();
 
 	earth->create3DfollowView();//初始化3d follow
 	earth->createDrawLine();//初始化画线
@@ -159,7 +279,7 @@ int main(int argc, char** argv)
 	earth->addImageLayer("GoogleImage2D", false, OEDriverType::TMS, "D:/Openstreet/tms.xml");
 	earth->addImageLayer("GoogleImage3D", true, OEDriverType::TMS, "D:/data/google/image/tms.xml");
 	earth->addElevationLayer("3DElevation", true, OEDriverType::VBP, "D:/data/Earth/output/earth.ive");
-	//earth->addElevationColor("3DElevationColor", "3DElevation", "D:/EarthMap/elevation.clr");
+	//earth->addElevationColor("3DElevationColor", "3DElevation", "D:/data/elevation.clr");
 
 	earth->getViewer2D()->addEventHandler(new CKeyboardHandler2D(earth));
 	earth->getViewer3D()->addEventHandler(new CKeyboardHandler3D(earth));
@@ -173,18 +293,18 @@ int main(int argc, char** argv)
 	mc2.modelFilePath = "PanoISRResource/texture/TYPE_AIRCRAFT.png";
 	CModel2D* m2 = new CModel2D(mc2);
 
-	
 
-	for (int i = 0; i < 33; i++)
-		for (int j = 0; j < 33; j++)
+
+	for (int i = 0; i < 5; i++)
+		for (int j = 0; j < 5; j++)
 		{
 			CModel3D* modelCopy = /*new CModel3D(mc)*/ m3->clone(osg::CopyOp::SHALLOW_COPY);
 			modelCopy->setModelName(modelCopy->getModelName() + "-" + (std::to_string(i) + std::to_string(j)));
 			modelCopy->setModelScale(osg::Vec3(3, 3, 3));
 
 			osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(true/*earth->getMapNode3D()*/, 106.56 + i * 0.05, 29.55 + j * 0.05, 2000/* + j * 2000*/);
-				osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
-				modelCopy->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
+			osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
+			modelCopy->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
 			modelCopy->setModelMatrix(mat3D);
 			earth->addChild3D(modelCopy->getModelGroup());
 			vecModel3D.push_back(modelCopy);
@@ -195,8 +315,8 @@ int main(int argc, char** argv)
 			
 
 			osg::Matrix mat2D = getWorldMatrixfromLonLatHeight(false/*earth->getMapNode2D()*/, 106.56 + i * 0.05, 29.55 + j * 0.05, 2000 /*+ j * 2000*/);
-				osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
-				modelCopy2D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
+			osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
+			modelCopy2D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
 			modelCopy2D->setModelMatrix(mat2D);
 			earth->addChild2D(modelCopy2D->getModelGroup());
 			vecModel2D.push_back(modelCopy2D);
@@ -207,16 +327,19 @@ int main(int argc, char** argv)
 		modelCopy1 = m3->clone(osg::CopyOp::SHALLOW_COPY);
 		modelCopy1->setModelScale(osg::Vec3(3, 3, 3));
 
-		osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(earth->getMapNode3D(), 106.56 + 1.8, 29.55 + 2.8, 10200);
-		osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
-		modelCopy1->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
-		modelCopy1->setModelMatrix(mat3D);
+		//osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(earth->getMapNode3D(), 106.56 + 1.8, 29.55 + 2.8, 10200);
+		//
+		osg::Vec4Array* vecArray3D = createCirclePath2(0.02, -0.005, 2000);
+		//modelCopy1->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
+		osg::ref_ptr<osg::AnimationPath> ap= creatAitPath(vecArray3D);//这个是另外一种移动方式
+		modelCopy1->setModelAnimationPathCallback1(ap);
+		//modelCopy1->setModelMatrix(mat3D);
 		earth->addChild3D(modelCopy1->getModelGroup());
 		vecModel3D.push_back(modelCopy1);
-
+		
 		modelCopy12D = m2->clone(osg::CopyOp::SHALLOW_COPY);
 		//modelCopy12D->setModelScale(osg::Vec3(3, 3, 3));
-
+		
 		osg::Matrix mat2D = getWorldMatrixfromLonLatHeight(earth->getMapNode2D(), 106.56 + 1.8, 29.55 + 1.8,10200);
 		osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
 		modelCopy12D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
@@ -237,9 +360,77 @@ int main(int argc, char** argv)
 
 
 	}
+	{
+		modelCopy2 = m3->clone(osg::CopyOp::SHALLOW_COPY);
+		modelCopy2->setModelScale(osg::Vec3(3, 3, 3));
+		osg::Vec4Array* vecArray3D = createCirclePath2(0.02, 0.02,0);
+		osg::ref_ptr<osg::AnimationPath> ap = creatAitPath(vecArray3D);//这个是另外一种移动方式
+		modelCopy2->setModelAnimationPathCallback1(ap);
+		earth->addChild3D(modelCopy2->getModelGroup());
+		vecModel3D.push_back(modelCopy2);
+		vecModelMT3D.push_back(modelCopy2->getModel());
+
+	}
+	{
+		modelCopy3 = m3->clone(osg::CopyOp::SHALLOW_COPY);
+		modelCopy3->setModelScale(osg::Vec3(3, 3, 3));
+		osg::Vec4Array* vecArray3D = createCirclePath2(-0.02, -0.02, 0);
+		osg::ref_ptr<osg::AnimationPath> ap = creatAitPath(vecArray3D);//这个是另外一种移动方式
+		modelCopy3->setModelAnimationPathCallback1(ap);
+		earth->addChild3D(modelCopy3->getModelGroup());
+		vecModel3D.push_back(modelCopy3);
+		vecModelMT3D.push_back(modelCopy3->getModel());
+
+	}
+	{
+		modelCopy4 = m3->clone(osg::CopyOp::SHALLOW_COPY);
+		modelCopy4->setModelScale(osg::Vec3(3, 3, 3));
+		osg::Vec4Array* vecArray3D = createCirclePath2(0, 0, 0);
+		osg::ref_ptr<osg::AnimationPath> ap = creatAitPath(vecArray3D);//这个是另外一种移动方式
+		modelCopy4->setModelAnimationPathCallback1(ap);
+		earth->addChild3D(modelCopy4->getModelGroup());
+		vecModel3D.push_back(modelCopy4);
+		vecModelMT3D.push_back(modelCopy4->getModel());
+
+	}
+	{
+		CModel3D* modelCopy = /*new CModel3D(mc)*/ m3->clone(osg::CopyOp::SHALLOW_COPY);
+		modelCopy->setModelName(modelCopy->getModelName() + "-" + (std::to_string(0) + std::to_string(0)));
+		modelCopy->setModelScale(osg::Vec3(3, 3, 3));
+
+		osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(true/*earth->getMapNode3D()*/, 106.56, 29.55, 20000/* + j * 2000*/);
+		osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
+		//modelCopy->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
+		modelCopy->setModelMatrix(mat3D);
+		earth->addChild3D(modelCopy->getModelGroup());
+		vecModel3D.push_back(modelCopy);
+		//vecModelMT3D.push_back(modelCopy->getModel());
+
+		CModel2D* modelCopy2D = m2->clone(osg::CopyOp::SHALLOW_COPY);
+		modelCopy2D->setModelName(modelCopy2D->getModelName() + "-" + (std::to_string(0) + std::to_string(0)));
+
+
+		osg::Matrix mat2D = getWorldMatrixfromLonLatHeight(false/*earth->getMapNode2D()*/, 106.56, 29.55, 200 /*+ j * 2000*/);
+		osg::ref_ptr<osg::Vec3Array> vecArray2D = createCirclePath(7000, mat2D);
+		//modelCopy2D->setModelAnimationPathCallback(vecArray2D, 1000, mat2D);
+		modelCopy2D->setModelMatrix(mat2D);
+		earth->addChild2D(modelCopy2D->getModelGroup());
+		vecModel2D.push_back(modelCopy2D);
+		//vecModelMT2D.push_back(modelCopy2D->getModel());
+	
+		modelCopy->setTrackVisible(false);
+		modelCopy->removeLabelCallback();
+		modelCopy->setLabelVisible(false);
+		modelCopy->removeTrackCallback();
+
+		modelCopy2D->setTrackVisible(false);
+		modelCopy2D->removeLabelCallback();
+		modelCopy2D->setLabelVisible(false);
+		modelCopy2D->removeTrackCallback();
+	}
 	
 	//CExplosion* exp = new CExplosion(3000000);
-	//earth->addChild3D(exp->createExplosionNode(osg::Vec3d()));
+	//earth->addChild3D(exp->createExplosionNode(osg::Vec3d(0,0,0)*getWorldMatrixfromLonLatHeight(true, 120.047 - 1.6*0.7, 24.507 + 0.6*0.7,1000)));
 	//for (int i = 0; i < vecModel3D.size(); i++)
 	//{
 	//	vecModel3D[i]->closeModelAutoTransform();
@@ -251,6 +442,25 @@ int main(int argc, char** argv)
 
 	//modelCopy1->addTargetLock(vecModelMT3D);
 	//modelCopy12D->addTargetLock(vecModelMT2D);
+
+	//display
+	osg::ref_ptr<osg::Node> airport = osgDB::readNodeFile("airport.ive");
+	//airport->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF |osg:: StateAttribute::OVERRIDE);
+	osg::MatrixTransform* mt_airport = new osg::MatrixTransform;
+	mt_airport->addChild(airport);
+	osg::Matrixd mt_temp;
+	osg::ref_ptr<osg::CoordinateSystemNode> csn = new osg::CoordinateSystemNode;
+	csn->setEllipsoidModel(new osg::EllipsoidModel); 
+	csn->getEllipsoidModel()->computeLocalToWorldTransformFromLatLongHeight(osg::DegreesToRadians(24.507), osg::DegreesToRadians(120.047), 1000, mt_temp);
+	mt_airport->setMatrix(mt_temp);
+	earth->getSwitchMapNode3D()->addChild(mt_airport);
+	vecModelMT3D.push_back(mt_airport);
+
+	modelCopy1->addTargetLock(vecModelMT3D);
+	//modelCopy2->addTargetLock(vecModelMT3D);
+	//modelCopy3->addTargetLock(vecModelMT3D);
+	//modelCopy4->addTargetLock(vecModelMT3D);
+
 
 	return earth->start();
 }

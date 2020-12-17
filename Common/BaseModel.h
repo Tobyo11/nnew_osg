@@ -48,7 +48,7 @@ public:
 	/*void setModelAnimationPathCallback(osg::ref_ptr<osg::Vec3Array> pointArray, double speed, osg::Matrix matToWorld);*/
 	virtual void setModelAnimationPathCallback(osg::ref_ptr<osg::Vec3Array> pointArray, double speed, osg::Matrix matToWorld) = 0;
 	/*设置模型运动路径动画(从动画路径)*/
-	void setModelAnimationPathCallback(osg::ref_ptr<osg::AnimationPath> ap);
+	void setModelAnimationPathCallback1(osg::ref_ptr<osg::AnimationPath> ap);
 	/*移除标牌回调*/
 	void removeLabelCallback();
 	/*移除尾迹回调*/

@@ -19,6 +19,9 @@ osg::Texture2D* createTexture2D(std::string sTextureName, osg::Texture::WrapMode
 osg::Node* createNode(osg::Texture2D* tex, int iRenderNum, float fWidth, float fHeight, float fPosX, float fPosY, osg::Vec4 vColor, bool bDepth, bool bAddShader = true);
 //创建圆形动画路径(世界坐标)
 osg::ref_ptr<osg::Vec3Array> createCirclePath(float radius, osg::Matrix matToWorld);
+//创建圆形动画路径(世界坐标) 1204 新加
+osg::Vec4Array* createCirclePath2(double _lon, double _lat, double _height);
+
 //根据mapnode的SRS由经纬高得到世界变换矩阵
 osg::Matrix getWorldMatrixfromLonLatHeight(osg::ref_ptr<osgEarth::MapNode> mapNode, double lon, double lat, double height);
 //根据mapnode的SRS由世界坐标点得到经纬高度
@@ -45,4 +48,5 @@ void removeChildrenbyNodeName(osg::ref_ptr<osg::Group> root, const std::string& 
 osg::Quat computeMatrix2Vector(osg::Vec3d v1, osg::Vec3d v2);
 ////使模型透明化，trans用于调节透明度，范围为0.0-1.0，其中1.0代表不透明。
 //void setModelTransparent(osg::Node *node, float trans);
+
 

@@ -127,6 +127,18 @@ osg::ref_ptr<osg::Vec3Array> createCirclePath(float radius, osg::Matrix matToWor
 	return plVertexArray;
 }
 
+osg::Vec4Array* createCirclePath2(double _lon,double _lat,double _height)
+{
+	osg::Vec4Array* vaTemp = new osg::Vec4Array;
+	vaTemp->push_back(osg::Vec4(120.047 - 2+_lon, 24.507 + 0.75+_lat, 1000.0+_height, 10));
+	vaTemp->push_back(osg::Vec4(120.048 - 2+_lon, 24.508 + 0.75+_lat, 1000.0+_height, 100));
+	vaTemp->push_back(osg::Vec4(120.049 - 2+_lon, 24.509 + 0.75+_lat, 1000.0+_height, 300));
+	vaTemp->push_back(osg::Vec4(120.050 - 2+_lon, 24.510 + 0.75+_lat, 1000.0+_height, 500));
+	vaTemp->push_back(osg::Vec4(120.047, 24.507, 10000.0, 1315));
+
+	return vaTemp;
+}
+
 osg::Matrix getWorldMatrixfromLonLatHeight(osg::ref_ptr<osgEarth::MapNode> mapNode, double lon, double lat, double height)
 {
 	const osgEarth::SpatialReference* wgs84 = osgEarth::SpatialReference::get("wgs84");

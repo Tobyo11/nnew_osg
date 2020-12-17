@@ -55,11 +55,11 @@ struct ModelConfig
 	{
 		modelName = "Aircraft";
 		//symbolFilePath = "./PanoISRResource/texture/TYPE_AIRCRAFT.png";
-		modelFilePath = "f35.fbx";
+		modelFilePath = "f35.FBX";//WRJDH_1k.FBX
 		//modelTextureShow = false;
 		modelColor = osg::Vec4(1.0, 0.0, 0.0, 1.0);
 		//symbolColor = osg::Vec4(1.0, 0.0, 0.0, 1.0);
-		trackType = TrackType::Line;
+		trackType = TrackType::Band;
 	}
 };
 

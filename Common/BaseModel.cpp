@@ -26,6 +26,7 @@ BaseModel::BaseModel()
 	_modelAutoTransform->setAutoRotateMode(osg::AutoTransform::AutoRotateMode::NO_ROTATION);
 	_modelAutoTransform->setAutoScaleToScreen(true);
 	_modelAutoTransform->setMinimumScale(20.0);
+	//_modelAutoTransform->setMaximumScale(10000.0);
 	//_modelAutoTransform->setAutoScaleTransitionWidthRatio(0.05);
 
 	_adjustVar = 0.0;
@@ -117,14 +118,14 @@ void BaseModel::addTargetLock(std::vector<osg::MatrixTransform*> vecModel)
 
 void BaseModel::initTrackLabel()
 {
-	////添加尾迹
-	//if (_modelTrack == NULL)
-	//{
-	//	//_modelTrack = new CTrack(_trackType, /*osg::Vec4f(0.0, 1.0, 0.0, 1.0)*/_modelColor);
-	//	//_modelGroup->addChild(_modelTrack->getTrackGeode());
-	//	_modelTrack = new NTrack(_trackType, _modelColor);
-	//	_modelGroup->addChild(_modelTrack->getTrackGeode());
-	//}
+	//添加尾迹
+	if (_modelTrack == NULL)
+	{
+		//_modelTrack = new CTrack(_trackType, /*osg::Vec4f(0.0, 1.0, 0.0, 1.0)*/_modelColor);
+		//_modelGroup->addChild(_modelTrack->getTrackGeode());
+		_modelTrack = new NTrack(_trackType, _modelColor);
+		_modelGroup->addChild(_modelTrack->getTrackGeode());
+	}
 
 	//添加标牌
 	if (_modelLabel == NULL)
@@ -153,7 +154,7 @@ void BaseModel::setLabelVisible(bool state)
 	_model->addUpdateCallback(new osg::AnimationPathCallback(ap));
 }*/
 
-void BaseModel::setModelAnimationPathCallback(osg::ref_ptr<osg::AnimationPath> ap)
+void BaseModel::setModelAnimationPathCallback1(osg::ref_ptr<osg::AnimationPath> ap)
 {
 	_model->addUpdateCallback(new osg::AnimationPathCallback(ap));
 }
@@ -166,7 +167,7 @@ osg::ref_ptr<osg::AnimationPath> BaseModel::getAnimationPathfromArray(osg::ref_p
 
 	double head = 0;
 	double time = 0;
-
+	
 	osg::Quat rotation;
 
 	//当前点
@@ -243,7 +244,105 @@ osg::ref_ptr<osg::AnimationPath> BaseModel::getAnimationPathfromArray(osg::ref_p
 	animationPath->insert(time, osg::AnimationPath::ControlPoint(positionNext, rotation * matToWorld.getRotate()));
 	return animationPath;
 }
-
+////newadd
+//osg::AnimationPath* creatAitPath(osg::Vec4Array* ctrl)
+//{
+//	osg::ref_ptr<osg::AnimationPath> animationPath = new osg::AnimationPath;
+//	animationPath->setLoopMode(osg::AnimationPath::LOOP);
+//
+//	double sp_angle;
+//	double cz_angle;
+//
+//	osg::Vec3d point_cur;
+//	osg::Vec3d point_next;
+//	osg::Matrix matrix;
+//	osg::Quat _rotation;
+//	//_rotation.makeRotate(osg::DegreesToRadians(270.0), 0.0, 0.0, 1.0);
+//	double time = 0;
+//
+//	for (osg::Vec4Array::iterator iter = ctrl->begin(); iter != ctrl->end(); iter++)
+//	{
+//		osg::Vec4Array::iterator iter2 = iter;
+//		iter2++;
+//
+//		if (iter2 == ctrl->end())
+//		{
+//			break;
+//		}
+//
+//
+//
+//
+//
+//
+//		double x, y, z;
+//		//std::cout << osg::DegreesToRadians(iter->y()) << "-" << osg::DegreesToRadians(iter->x()) << std::endl;
+//		mapSRS->getEllipsoid()->convertLatLongHeightToXYZ(osg::DegreesToRadians(iter->y()), osg::DegreesToRadians(iter->x()), iter->z(), x, y, z);
+//
+//		point_cur = osg::Vec3d(x, y, z);
+//		mapSRS->getEllipsoid()->convertLatLongHeightToXYZ(osg::DegreesToRadians(iter2->y()), osg::DegreesToRadians(iter2->x()), iter2->z(), x, y, z);
+//		point_next = osg::Vec3d(x, y, z);
+//
+//		//水平角
+//		if (iter->x() == iter2->x())
+//		{
+//			sp_angle = osg::PI_2;
+//		}
+//		else
+//		{
+//			sp_angle = atan((iter2->y() - iter->y()) / (iter2->x() - iter->x()));
+//			if (iter2->x() > iter->x())
+//			{
+//				sp_angle += (osg::PI_2 * 2);
+//			}
+//		}
+//		//俯仰角
+//
+//		if (iter->z() == iter2->z())
+//		{
+//
+//			cz_angle = 0;
+//		}
+//		else
+//		{
+//			if (0 == sqrt(pow(get_dis(point_cur, point_next), 2) - pow((iter2->z() - iter->z()), 2)))
+//			{
+//				cz_angle = osg::PI_2;
+//			}
+//			else
+//			{
+//				cz_angle = atan((iter2->z() - iter->z()) / sqrt(pow(get_dis(point_cur, point_next), 2) - pow((iter2->z() - iter->z()), 2)));
+//
+//			}
+//			if (cz_angle > osg::PI_2)
+//			{
+//				cz_angle = osg::PI_2;
+//			}
+//			if (cz_angle < -osg::PI_2)
+//			{
+//				cz_angle = -osg::PI_2;
+//			}
+//		}
+//		//求变换矩阵
+//		mapSRS->getEllipsoid()->computeLocalToWorldTransformFromLatLongHeight(osg::DegreesToRadians(iter->y()), osg::DegreesToRadians(iter->x()), iter->z(), matrix);
+//		_rotation.makeRotate(0, osg::Vec3(1.0, 0.0, 0.0), cz_angle, osg::Vec3(0.0, 1.0, 0.0), sp_angle + osg::PI_2, osg::Vec3(0.0, 0.0, 1.0));
+//		matrix.preMultRotate(_rotation);
+//
+//		//matrix.preMult(osg::Matrix::scale(osg::Vec3(100, 100, 100)));
+//
+//		//matrix.preMultScale(osg::Matrix::scale(osg::Vec3(100, 100, 100)));
+//
+//		animationPath->insert(time, osg::AnimationPath::ControlPoint(point_cur, matrix.getRotate()));
+//
+//		//求下一点time
+//		time += get_runtime(point_cur, point_next, iter2->w());
+//
+//	}
+//	animationPath->insert(time, osg::AnimationPath::ControlPoint(point_next, matrix.getRotate()));
+//
+//	return animationPath.release();
+//}
+////newadd
 void BaseModel::addTrackUpdateCallback(bool render3D)
 {
 	if (_modelTrack)
