@@ -20,6 +20,7 @@
 #include <osgEarth/ImageLayer>
 #include <osgGA/StateSetManipulator>
 #include <osgGA/KeySwitchMatrixManipulator>
+#include <osgEarthUtil/AutoClipPlaneHandler>
 class SysncOperation :public osg::GraphicsOperation
 {
 
@@ -447,6 +448,12 @@ void DigitalEarth::delet3DfollowView()
 
 }
 
+void DigitalEarth::setdateTime(int _year, int _month, int _day, float _hours)
+{
+	osgEarth::DateTime dt(_year, _month, _day, _hours);
+	_skyNode->setDateTime(dt);
+}
+
 void DigitalEarth::init()
 {//初始化,即便23D同时渲染,也优先渲染3D
 	_viewer = new osgViewer::CompositeViewer;
@@ -485,6 +492,22 @@ void DigitalEarth::init()
 	setRenderMapType(_render2D, _render3D);
 
 	osgEarth::GLUtils::setGlobalDefaults(_viewer3D->getCamera()->getOrCreateStateSet());//bug
+
+	//skynode
+	osgEarth::Util::Ephemeris* ephemeris = new osgEarth::Util::Ephemeris;
+	_skyNode = osgEarth::Util::SkyNode::create(_mapNode3D);
+	_skyNode->setName("SkyNode");
+	_skyNode->setEphemeris(ephemeris);
+	osgEarth::DateTime dateTime(2019, 5, 8, 7);
+	_skyNode->setDateTime(dateTime);
+	_skyNode->attach(_viewer3D, 0);
+	_skyNode->setLighting(true);
+	_skyNode->getSunLight()->setAmbient(osg::Vec4d(0.15, 0.15, 0.15, 0.8));
+	_skyNode->getSunLight()->setDiffuse(osg::Vec4d(0.0, 0.0, 0.0, 0.0));
+	_skyNode->getSunLight()->setSpecular(osg::Vec4d(0.0, 0.0, 0.0, 0.0));
+	_skyNode->addChild(_mapNode3D);
+	_switchMapNode3D->addChild(_skyNode);
+
 
 }
 
@@ -533,7 +556,7 @@ void DigitalEarth::initEarth()
 		_mapNode2D = NULL;
 	}
 
-	_switchMapNode3D->addChild(_mapNode3D);
+	//_switchMapNode3D->addChild(_mapNode3D);
 	_root3D->addChild(_switchMapNode3D);
 
 }
@@ -560,7 +583,8 @@ void DigitalEarth::initViewer()
 	_earthManipulator3D->getSettings()->setTerrainAvoidanceEnabled(true);
 	_earthManipulator3D->getSettings()->setTerrainAvoidanceMinimumDistance(1000);
 	_viewer3D->setCameraManipulator(_earthManipulator3D);
-
+	//
+	_viewer3D->getCamera()->addCullCallback(new osgEarth::Util::AutoClipPlaneCullCallback(_mapNode3D));
 	//初始化上下文(默认为渲染3D地图状态)
 	osg::GraphicsContext::WindowingSystemInterface* wsi = osg::GraphicsContext::getWindowingSystemInterface();
 	unsigned int width, height;

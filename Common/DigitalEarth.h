@@ -20,7 +20,7 @@
 #include <osgEarthUtil/MeasureTool>
 #include <osgEarth/MapNode>
 #include <osg/AnimationPath>
-
+#include <osgEarthUtil/ExampleResources>
 class DigitalEarth
 {
 public:
@@ -89,6 +89,12 @@ public:
 	osg::ref_ptr<osg::Switch> getSwitchMapNode2D() { return _switchMapNode2D; }
 	osg::ref_ptr<osg::Switch> getSwitchMapNode3D() { return _switchMapNode3D; }
 
+	/*获取skyNode*/
+	osg::ref_ptr<osgEarth::Util::SkyNode> getskyNode() { return _skyNode; }
+
+	/*获取skyNode*/
+	void setdateTime(int _year, int _month, int _day, float _hours);
+
 	/*获取MapType*/
 	MapType getMapType() { return _mapType; }
 
@@ -118,6 +124,8 @@ private:
 	osg::ref_ptr<osgEarth::Util::EarthManipulator> _earthManipulator2D;
 	osg::ref_ptr<osgEarth::Util::EarthManipulator> _earthManipulator3D;
 	osg::ref_ptr<osgEarth::Util::EarthManipulator> _earthManipulator3Dfollow;
+
+	osg::ref_ptr<osgEarth::Util::SkyNode> _skyNode;
 
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits;
 	osg::ref_ptr<osg::GraphicsContext> gc;//图形接口

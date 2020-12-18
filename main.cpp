@@ -23,6 +23,10 @@
 
 #include <iostream>
 #include <osgEarthUtil/Controls>
+
+#include <osgEarthUtil/LatLongFormatter>
+
+#include <osgEarthUtil/GeodeticGraticule>
 CModel3D* modelCopy1;//test
 CModel3D* modelCopy2;//test
 CModel3D* modelCopy3;//test
@@ -136,6 +140,27 @@ public:
 			{
 				_earth->closeDrawLine();
 			}
+			if (ea.getKey() == '9')////close draw line
+			{
+				
+				_earth->setdateTime(2019, 5, 8, 3);
+			}
+			if (ea.getKey() == '0')////close draw line
+			{
+				_earth->setdateTime(2019, 5, 8, 14);
+			}
+			if (ea.getKey() == '7')
+			{
+				gr = new osgEarth::Util::GeodeticGraticule();
+				_earth->getMapNode3D()->getMap()->addLayer(gr);
+				viewer->getCamera()->setSmallFeatureCullingPixelSize(-1.0f);
+				//viewer->getCamera()->setNearFarRatio(0.0001);
+
+			}
+			if (ea.getKey() == '8')////close draw line
+			{
+				_earth->getMapNode3D()->getMap()->removeLayer(gr);
+			}
 		
 			//if (ea.getKey() == osgGA::GUIEventAdapter::KEY_V)
 			//{//隐藏高程着色
@@ -148,6 +173,7 @@ public:
 	}
 private:
 	DigitalEarth* _earth;
+	osgEarth::Util::GeodeticGraticule* gr;
 };
 /////35path
 const osgEarth::Util::Controls::SpatialReference* mapSRS;
@@ -295,14 +321,14 @@ int main(int argc, char** argv)
 
 
 
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5; j++)
+	for (int i = 0; i < 20; i++)
+		for (int j = 0; j < 20; j++)
 		{
 			CModel3D* modelCopy = /*new CModel3D(mc)*/ m3->clone(osg::CopyOp::SHALLOW_COPY);
 			modelCopy->setModelName(modelCopy->getModelName() + "-" + (std::to_string(i) + std::to_string(j)));
 			modelCopy->setModelScale(osg::Vec3(3, 3, 3));
 
-			osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(true/*earth->getMapNode3D()*/, 106.56 + i * 0.05, 29.55 + j * 0.05, 2000/* + j * 2000*/);
+			osg::Matrix mat3D = getWorldMatrixfromLonLatHeight(true/*earth->getMapNode3D()*/, 106.56 + i * 0.05, 29.55 + j * 0.05, -50/* + j * 2000*/);
 			osg::ref_ptr<osg::Vec3Array> vecArray3D = createCirclePath(7000, mat3D);
 			modelCopy->setModelAnimationPathCallback(vecArray3D, 1000, mat3D);
 			modelCopy->setModelMatrix(mat3D);
